@@ -22,7 +22,7 @@ func main() {
 		logger.Fatal(ctx, errors.WithMessage(err, "setup logger"))
 	}
 
-	linkWatcher, err := watchers.NftWatcher()
+	linkWatcher, err := watchers.LinkWatcher()
 	if err != nil {
 		logger.Fatal(ctx, errors.WithMessage(err, "create link watcher"))
 	}

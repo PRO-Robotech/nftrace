@@ -303,6 +303,73 @@ func (sui *watchersTestSuite) Test_SetElementWatcher() {
 	nlWatcher.AssertExpectations(sui.T())
 }
 
+func (sui *watchersTestSuite) Test_NftWatcher() {
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+
+	nlWatcher := makeNlWatcherMock(sui.T(), doneCh)
+	nftWatcher := &watcherImpl[NftEvent]{
+		nlWatcher: nlWatcher,
+		que:       queue.NewFIFO[NftEvent](),
+		stop:      make(chan struct{}),
+	}
+	expRuleExpr := `meta l4proto tcp counter packets 0 bytes 0 log accept comment "` + comment + `" # handle 5`
+	expRuleInfo := fmt.Sprintf(
+		`%T: rule '%s' has added`, *new(RuleEvent), expRuleExpr,
+	)
+	expChainInfo := fmt.Sprintf(
+		`%T: chain '%s' has added`, *new(ChainEvent), chain.Name,
+	)
+	expSetInfo := fmt.Sprintf(
+		`%T: set '%s' has added`, *new(SetEvent), ipSet.Name,
+	)
+	expSetElemInfo := fmt.Sprintf(
+		`%T: set element has added`, *new(SetElementEvent),
+	)
+	expTblInfo := fmt.Sprintf(
+		`%T: table '%s' has added`, *new(TableEvent), tbl.Name,
+	)
+
+	var ruleOk, chainOk, setOk, setElemOk, tableOk bool
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	stream := nftWatcher.Stream(ctx)
+
+	for data := range stream {
+		sui.Require().NoError(data.Err)
+		switch data.Evt.Val.(type) {
+		case RuleEvent:
+			sui.Require().Equal(expRuleInfo, data.Evt.ActionInfo())
+			ruleOk = true
+		case ChainEvent:
+			sui.Require().Equal(expChainInfo, data.Evt.ActionInfo())
+			chainOk = true
+		case SetEvent:
+			sui.Require().Equal(expSetInfo, data.Evt.ActionInfo())
+			setOk = true
+		case SetElementEvent:
+			sui.Require().Equal(expSetElemInfo, data.Evt.ActionInfo())
+			setElemOk = true
+		case TableEvent:
+			sui.Require().Equal(expTblInfo, data.Evt.ActionInfo())
+			tableOk = true
+		default:
+			sui.T().Fatalf("unexpected event type: %T", data.Evt.Val)
+		}
+	}
+
+	sui.Require().True(ruleOk, "RuleEvent not received")
+	sui.Require().True(chainOk, "ChainEvent not received")
+	sui.Require().True(setOk, "SetEvent not received")
+	sui.Require().True(setElemOk, "SetElementEvent not received")
+	sui.Require().True(tableOk, "TableEvent not received")
+
+	nftWatcher.Close()
+	nlWatcher.AssertExpectations(sui.T())
+}
+
 func makeNlWatcherMock(t *testing.T, doneCh <-chan struct{}) *NlWatcherMock {
 	nlWatcher := NlWatcherMock{}
 	nlWatcher.On("Stream", mock.Anything).
