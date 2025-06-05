@@ -2,8 +2,6 @@ package collectors
 
 import (
 	"context"
-
-	"github.com/PRO-Robotech/nftrace"
 )
 
 type (
@@ -15,13 +13,5 @@ type (
 
 	Telemetry interface {
 		isMetrics()
-	}
-
-	LinkProvider interface {
-		LinkByIndex(int) (string, error)
-	}
-
-	RuleProvider interface {
-		GetHumanRule(nftrace.RuleDescriptor) (string, error)
 	}
 )

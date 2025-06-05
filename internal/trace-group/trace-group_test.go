@@ -5,6 +5,7 @@ import (
 
 	"github.com/PRO-Robotech/nftrace"
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
+	"github.com/PRO-Robotech/nftrace/internal/providers"
 
 	nfte "github.com/google/nftables/expr"
 	"github.com/stretchr/testify/mock"
@@ -18,8 +19,8 @@ const (
 
 type (
 	DepsMock struct {
-		iface collectors.LinkProvider
-		rule  collectors.RuleProvider
+		iface providers.LinkProvider
+		rule  providers.RuleProvider
 	}
 	LinkProviderMock struct {
 		mock.Mock
@@ -29,8 +30,12 @@ type (
 	}
 )
 
-func (i *LinkProviderMock) LinkByIndex(index int) (string, error) {
-	return ifaceName, nil
+func (i *LinkProviderMock) LinkByIndex(index int) (providers.Link, error) {
+	return providers.Link{Name: ifaceName}, nil
+}
+
+func (i *LinkProviderMock) Close() error {
+	return nil
 }
 
 func (r *ruleProviderMock) GetHumanRule(tr nftrace.RuleDescriptor) (string, error) {

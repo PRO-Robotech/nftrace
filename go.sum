@@ -1,9 +1,13 @@
+github.com/H-BF/netlink v1.3.0-dev h1:jkU3CicokrzVv7gk6fb0R9uACsBZ1t3241cQyrz0VUo=
+github.com/H-BF/netlink v1.3.0-dev/go.mod h1:52OU3LtmLAR6P7fWhbQa+3oh5y99VFFcBwHfY3tnNKc=
 github.com/H-BF/nftables v0.3.0-dev h1:XECWkkB4G7j/i47enEnY/IOpPC7yLjPLKmv6PaFEIdQ=
 github.com/H-BF/nftables v0.3.0-dev/go.mod h1:iirY5mGIjpb1WYh/33lrangRENlS2wwJYHeKwmJvP+Q=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PRO-Robotech/corelib v1.2.23-dev h1:f3yN/GLbxTQ+hgt3/fvj+hwxpe+4f+jSU1AWxcHpLDk=
 github.com/PRO-Robotech/corelib v1.2.23-dev/go.mod h1:ThyIZTHGY6JhZxe6RaMk69FOQSAUTLEizaeuFZiqM7k=
+github.com/PRO-Robotech/corelib v1.2.24-dev h1:IvHj6g0G3vQvAg3lzh+Aom2KWWB7KtsQ64+zoJ7y1S0=
+github.com/PRO-Robotech/corelib v1.2.24-dev/go.mod h1:ThyIZTHGY6JhZxe6RaMk69FOQSAUTLEizaeuFZiqM7k=
 github.com/PRO-Robotech/nft-go v0.0.4-dev h1:8Zx3OYPAQ/fTtvSKEXWesopN0B71cwB7lSN9sdwCYV8=
 github.com/PRO-Robotech/nft-go v0.0.4-dev/go.mod h1:y7UetKHvvao4NhH6uo/tjvr5lDwMJXPn6IY9UB105qc=
 github.com/ahmetb/go-linq/v3 v3.2.0 h1:BEuMfp+b59io8g5wYzNoFe9pWPalRklhlhbiU3hYZDE=

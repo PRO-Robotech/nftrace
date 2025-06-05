@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	nl "github.com/H-BF/corlib/pkg/netlink"
 	"github.com/H-BF/corlib/pkg/queue"
-	"github.com/PRO-Robotech/nftrace/internal/nl"
 	nftLib "github.com/google/nftables"
 	"github.com/google/nftables/expr"
 	"github.com/google/nftables/userdata"

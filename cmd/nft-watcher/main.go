@@ -22,18 +22,18 @@ func main() {
 		logger.Fatal(ctx, errors.WithMessage(err, "setup logger"))
 	}
 
-	linkWatcher, err := watchers.LinkWatcher()
+	nftWatcher, err := watchers.NftWatcher()
 	if err != nil {
-		logger.Fatal(ctx, errors.WithMessage(err, "create link watcher"))
+		logger.Fatal(ctx, errors.WithMessage(err, "create nft watcher"))
 	}
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer func() {
-			linkWatcher.Close()
+			nftWatcher.Close()
 			wg.Done()
 		}()
-		stm := linkWatcher.Stream(ctx)
+		stm := nftWatcher.Stream(ctx)
 		for {
 			select {
 			case <-ctx.Done():

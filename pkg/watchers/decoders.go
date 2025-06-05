@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/PRO-Robotech/nftrace/internal/nl"
-
+	nl "github.com/H-BF/corlib/pkg/netlink"
 	"github.com/Morwran/nft-go/pkg/nlparser"
 	"github.com/mdlayher/netlink"
 	"golang.org/x/sys/unix"

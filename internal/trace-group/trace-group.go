@@ -5,6 +5,7 @@ import (
 
 	model "github.com/PRO-Robotech/nftrace"
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
+	"github.com/PRO-Robotech/nftrace/internal/providers"
 
 	"github.com/Morwran/nft-go/pkg/nftenc"
 	"github.com/Morwran/nft-go/pkg/protocols"
@@ -15,14 +16,14 @@ import (
 
 type (
 	TraceGroup struct {
-		link       collectors.LinkProvider
-		rule       collectors.RuleProvider
+		link       providers.LinkProvider
+		rule       providers.RuleProvider
 		topTrace   collectors.NftTrace
 		traceCache map[uint32][]collectors.NftTrace
 	}
 )
 
-func NewTraceGroup(iface collectors.LinkProvider, rule collectors.RuleProvider) *TraceGroup {
+func NewTraceGroup(iface providers.LinkProvider, rule providers.RuleProvider) *TraceGroup {
 	return &TraceGroup{
 		link:       iface,
 		rule:       rule,
@@ -102,20 +103,22 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 	oifname := t.topTrace.Oifname
 
 	if iifname == "" && t.topTrace.Iif != 0 {
-		iifname, err = t.link.LinkByIndex(int(t.topTrace.Iif))
+		lk, err := t.link.LinkByIndex(int(t.topTrace.Iif))
 		if err != nil {
 			return m, errors.WithMessagef(err,
 				"failed to find ifname for the ingress traffic by interface id=%d",
 				int(t.topTrace.Iif))
 		}
+		iifname = lk.Name
 	}
 	if oifname == "" && t.topTrace.Oif != 0 {
-		oifname, err = t.link.LinkByIndex(int(t.topTrace.Oif))
+		lk, err := t.link.LinkByIndex(int(t.topTrace.Oif))
 		if err != nil {
 			return m, errors.WithMessagef(err,
 				"failed to find ifname for the egress traffic by interface id=%d",
 				int(t.topTrace.Oif))
 		}
+		oifname = lk.Name
 	}
 
 	m = model.Trace{

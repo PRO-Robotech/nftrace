@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/PRO-Robotech/nftrace/internal/nl"
-
+	nl "github.com/H-BF/corlib/pkg/netlink"
 	"github.com/H-BF/corlib/pkg/queue"
 	"github.com/mdlayher/netlink"
 	"golang.org/x/sys/unix"
