@@ -9,8 +9,8 @@ require (
 	github.com/emirpasic/gods v1.18.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/nftables v0.3.0
+	github.com/jellydator/ttlcache/v3 v3.3.0
 	github.com/mdlayher/netlink v1.7.3-0.20250113171957-fbb4dce95f42
-	github.com/mdlayher/socket v0.5.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.22.0
 )
@@ -24,6 +24,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
+	github.com/mdlayher/socket v0.5.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
@@ -39,7 +40,7 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 )
 
 replace github.com/H-BF/corlib v1.2.24-dev => github.com/PRO-Robotech/corelib v1.2.24-dev

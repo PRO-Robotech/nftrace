@@ -1,9 +1,5 @@
 package providers
 
-import (
-	"github.com/PRO-Robotech/nftrace"
-)
-
 type (
 	LinkProvider interface {
 		LinkByIndex(int) (Link, error)
@@ -11,6 +7,7 @@ type (
 	}
 
 	RuleProvider interface {
-		GetHumanRule(nftrace.RuleDescriptor) (string, error)
+		GetHumanRule(RuleKey) (string, error)
+		Close() error
 	}
 )

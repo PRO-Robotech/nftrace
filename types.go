@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/cespare/xxhash"
-	nftLib "github.com/google/nftables"
 )
 
 type (
@@ -49,13 +48,6 @@ type (
 		UserAgent string
 		// aggregated trace counter
 		Cnt uint64
-	}
-
-	RuleDescriptor struct {
-		TableName   string
-		TableFamily nftLib.TableFamily
-		ChainName   string
-		RuleHandle  uint64
 	}
 )
 

@@ -89,10 +89,10 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 		return m, errors.New("failed to find trace of rule type")
 	}
 
-	humanRule, err := t.rule.GetHumanRule(model.RuleDescriptor{
+	humanRule, err := t.rule.GetHumanRule(providers.RuleKey{
 		TableName:   t.topTrace.Table,
 		ChainName:   t.topTrace.Chain,
-		RuleHandle:  t.topTrace.RuleHandle,
+		Handle:      t.topTrace.RuleHandle,
 		TableFamily: nftLib.TableFamily(t.topTrace.Family),
 	})
 	if err != nil {

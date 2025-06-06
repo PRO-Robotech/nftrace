@@ -38,7 +38,7 @@ func NewLinkProvider(ctx context.Context) (*linkProvider, error) {
 		return nil, err
 	}
 
-	go lp.watch(ctx)
+	go lp.run(ctx)
 
 	return lp, nil
 }
@@ -66,7 +66,7 @@ func (lp *linkProvider) Close() error {
 	return nil
 }
 
-func (lp *linkProvider) watch(ctx context.Context) {
+func (lp *linkProvider) run(ctx context.Context) {
 	updates := make(chan nl.LinkUpdate)
 	done := make(chan struct{})
 	if err := nl.LinkSubscribe(updates, done); err != nil {

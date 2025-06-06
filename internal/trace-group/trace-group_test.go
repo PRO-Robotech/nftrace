@@ -3,7 +3,6 @@ package tracegroup
 import (
 	"testing"
 
-	"github.com/PRO-Robotech/nftrace"
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
 	"github.com/PRO-Robotech/nftrace/internal/providers"
 
@@ -38,8 +37,12 @@ func (i *LinkProviderMock) Close() error {
 	return nil
 }
 
-func (r *ruleProviderMock) GetHumanRule(tr nftrace.RuleDescriptor) (string, error) {
+func (r *ruleProviderMock) GetHumanRule(tr providers.RuleKey) (string, error) {
 	return "mocked rule", nil
+}
+
+func (r *ruleProviderMock) Close() error {
+	return nil
 }
 
 func Test_TraceGroup(t *testing.T) {
