@@ -1,9 +1,7 @@
-package linkwatcher
+package app
 
 import (
 	"context"
-
-	"github.com/PRO-Robotech/nftrace/internal/app"
 
 	"github.com/H-BF/corlib/logger"
 	"github.com/H-BF/corlib/pkg/signals"
@@ -19,5 +17,5 @@ func SetupContext() {
 		cancel()
 		return nil
 	})
-	app.SetContext(ctx)
+	SetContext(ctx)
 }

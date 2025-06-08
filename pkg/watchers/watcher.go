@@ -50,8 +50,9 @@ func newWatcher[T watcherT]() (*watcherImpl[T], error) {
 
 // Stream - start streaming watching events
 func (w *watcherImpl[T]) Stream(ctx context.Context) <-chan WatcherEvent[T] {
+	const queSize = 100
 	w.onceRun.Do(func() {
-		w.ch = make(chan WatcherEvent[T], 100)
+		w.ch = make(chan WatcherEvent[T], queSize)
 		errCh := make(chan error, 1)
 		go func() {
 			defer close(errCh)

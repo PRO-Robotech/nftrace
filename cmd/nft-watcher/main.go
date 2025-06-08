@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/PRO-Robotech/nftrace/internal/app"
-	. "github.com/PRO-Robotech/nftrace/internal/app/link-watcher" //nolint:revive
+	. "github.com/PRO-Robotech/nftrace/internal/app/nft-watcher" //nolint:revive
 	"github.com/PRO-Robotech/nftrace/pkg/watchers"
 
 	"github.com/H-BF/corlib/logger"
@@ -13,12 +13,12 @@ import (
 )
 
 func main() {
-	SetupContext()
+	app.SetupContext()
 	ctx := app.Context()
 	logger.SetLevel(zap.InfoLevel)
 	logger.InfoKV(ctx, "-= HELLO =-", "version", app.GetVersion())
 
-	if err := SetupLogger(LogLevel); err != nil {
+	if err := app.SetupLogger(LogLevel); err != nil {
 		logger.Fatal(ctx, errors.WithMessage(err, "setup logger"))
 	}
 
@@ -30,7 +30,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer func() {
-			nftWatcher.Close()
+			_ = nftWatcher.Close()
 			wg.Done()
 		}()
 		stm := nftWatcher.Stream(ctx)

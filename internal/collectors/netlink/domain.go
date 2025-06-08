@@ -6,6 +6,7 @@ import (
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
 	"github.com/PRO-Robotech/nftrace/internal/collectors/netlink/headers"
 	"github.com/PRO-Robotech/nftrace/internal/decoders"
+
 	"github.com/mdlayher/netlink"
 	"golang.org/x/sys/unix"
 )

@@ -64,5 +64,6 @@ func (trace *EbpfTrace) ToNftTrace() collectors.NftTrace {
 		IpProtocol: trace.IpProto,
 		Cnt:        trace.Counter,
 		ReadyMsk:   trace.ReadyMsk,
+		Metrics:    trace.metrics,
 	}
 }

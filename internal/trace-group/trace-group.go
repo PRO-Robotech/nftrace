@@ -1,6 +1,8 @@
 package tracegroup
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	model "github.com/PRO-Robotech/nftrace"
@@ -10,7 +12,6 @@ import (
 	"github.com/Morwran/nft-go/pkg/nftenc"
 	"github.com/Morwran/nft-go/pkg/protocols"
 	nftLib "github.com/google/nftables"
-	"github.com/pkg/errors"
 	"golang.org/x/sys/unix"
 )
 
@@ -23,17 +24,37 @@ type (
 	}
 )
 
-func NewTraceGroup(iface providers.LinkProvider, rule providers.RuleProvider) *TraceGroup {
+func NewTraceGroup(link providers.LinkProvider, rule providers.RuleProvider) *TraceGroup {
 	return &TraceGroup{
-		link:       iface,
+		link:       link,
 		rule:       rule,
 		traceCache: make(map[uint32][]collectors.NftTrace),
 	}
 }
 
+func (t *TraceGroup) Handle(tr collectors.NftTrace, cb func(model.Trace, collectors.Telemetry)) error {
+	if err := t.AddTrace(tr); err != nil {
+		return err
+	}
+	if !t.GroupReady() {
+		return ErrTraceDataNotReady
+	}
+	m, err := t.ToModel()
+	if err != nil {
+		return fmt.Errorf("failed to convert obtained trace into model: %w", err)
+	}
+	t.Reset()
+
+	if cb != nil {
+		cb(m, tr.Metrics)
+	}
+
+	return nil
+}
+
 func (t *TraceGroup) AddTrace(tr collectors.NftTrace) error {
 	if _, ok := traceTypes[tr.Type]; !ok {
-		return errors.Wrapf(ErrUnknownTraceType, "type=%d", tr.Type)
+		return fmt.Errorf("type=%d: %w", tr.Type, ErrUnknownTraceType)
 	}
 
 	if tr.Type == unix.NFT_TRACETYPE_POLICY {
@@ -86,7 +107,7 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 	}
 
 	if t.topTrace.Type != unix.NFT_TRACETYPE_RULE {
-		return m, errors.New("failed to find trace of rule type")
+		return m, errors.New("can't find trace of rule type")
 	}
 
 	humanRule, err := t.rule.GetHumanRule(providers.RuleKey{
@@ -96,7 +117,7 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 		TableFamily: nftLib.TableFamily(t.topTrace.Family),
 	})
 	if err != nil {
-		return m, errors.WithMessagef(err, "trace data: %+v", t.topTrace)
+		return m, fmt.Errorf("trace data: %+v: %w", t.topTrace, err)
 	}
 
 	iifname := t.topTrace.Iifname
@@ -105,42 +126,43 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 	if iifname == "" && t.topTrace.Iif != 0 {
 		lk, err := t.link.LinkByIndex(int(t.topTrace.Iif))
 		if err != nil {
-			return m, errors.WithMessagef(err,
-				"failed to find ifname for the ingress traffic by interface id=%d",
-				int(t.topTrace.Iif))
+			return m, fmt.Errorf(
+				"failed to find link by interface id=%d: %w",
+				int(t.topTrace.Iif), err)
 		}
 		iifname = lk.Name
 	}
 	if oifname == "" && t.topTrace.Oif != 0 {
 		lk, err := t.link.LinkByIndex(int(t.topTrace.Oif))
 		if err != nil {
-			return m, errors.WithMessagef(err,
-				"failed to find ifname for the egress traffic by interface id=%d",
-				int(t.topTrace.Oif))
+			return m, fmt.Errorf(
+				"failed to find link by interface id=%d: %w",
+				int(t.topTrace.Oif), err)
 		}
 		oifname = lk.Name
 	}
 
 	m = model.Trace{
-		TrId:       t.topTrace.Id,
-		Table:      t.topTrace.Table,
-		Chain:      t.topTrace.Chain,
-		JumpTarget: t.topTrace.JumpTarget,
-		RuleHandle: t.topTrace.RuleHandle,
-		Family:     nftenc.TableFamily(t.topTrace.Family).String(),
-		Iifname:    iifname,
-		Oifname:    oifname,
-		SMacAddr:   t.topTrace.SMacAddr,
-		DMacAddr:   t.topTrace.DMacAddr,
-		SAddr:      t.topTrace.SAddr,
-		DAddr:      t.topTrace.DAddr,
-		SPort:      t.topTrace.SPort,
-		DPort:      t.topTrace.DPort,
-		Length:     t.topTrace.Length,
-		IpProto:    protocols.ProtoType(t.topTrace.IpProtocol).String(),
-		Verdict:    verdict.String(),
-		Rule:       humanRule,
-		Cnt:        t.topTrace.Cnt,
+		ID:        t.topTrace.Id,
+		Table:     t.topTrace.Table,
+		Chain:     t.topTrace.Chain,
+		Jump:      t.topTrace.JumpTarget,
+		Handle:    t.topTrace.RuleHandle,
+		Family:    nftenc.TableFamily(t.topTrace.Family).String(),
+		IIF:       iifname,
+		OIF:       oifname,
+		SMAC:      t.topTrace.SMacAddr,
+		DMAC:      t.topTrace.DMacAddr,
+		SAddr:     t.topTrace.SAddr,
+		DAddr:     t.topTrace.DAddr,
+		SPort:     t.topTrace.SPort,
+		DPort:     t.topTrace.DPort,
+		Len:       t.topTrace.Length,
+		Proto:     protocols.ProtoType(t.topTrace.IpProtocol).String(),
+		Verdict:   verdict.String(),
+		Rule:      humanRule,
+		IpVersion: t.topTrace.IpVersion,
+		Cnt:       t.topTrace.Cnt,
 	}
 
 	return m, nil
@@ -153,6 +175,7 @@ var traceTypes = map[uint32]string{
 }
 
 var (
-	ErrUnknownTraceType = errors.New("unknown trace type")
-	ErrTraceGroupEmpty  = errors.New("trace group is empty")
+	ErrUnknownTraceType  = errors.New("unknown trace type")
+	ErrTraceGroupEmpty   = errors.New("trace group is empty")
+	ErrTraceDataNotReady = errors.New("trace data is not ready")
 )

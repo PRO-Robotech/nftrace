@@ -60,7 +60,10 @@ type (
 var _ collectors.TraceCollector = (*ebpfTraceCollector)(nil)
 
 func NewEbpfTraceCollector(cfg Config) (tc *ebpfTraceCollector, err error) {
-	var cancels []func() error
+	var (
+		queMap  *ebpf.Map
+		cancels []func() error
+	)
 
 	defer func() {
 		if err != nil {
@@ -87,9 +90,9 @@ func NewEbpfTraceCollector(cfg Config) (tc *ebpfTraceCollector, err error) {
 	var loadOpts *ebpf.CollectionOptions
 	objs := bpfObjects{}
 
-	queMap, e := newPerCpuQueMap(meta.GetFieldTag(&objs.bpfMaps, &objs.PerCpuQue, "ebpf"), runtime.NumCPU())
-	if e != nil {
-		return nil, fmt.Errorf("failed to create map in map que: %w", e)
+	queMap, err = newPerCpuQueMap(meta.GetFieldTag(&objs.bpfMaps, &objs.PerCpuQue, "ebpf"), runtime.NumCPU())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create map in map que: %w", err)
 	}
 
 	cancels = append(cancels, queMap.Close)
@@ -283,6 +286,9 @@ func (cfg Config) validate() error {
 				),
 		),
 		oz.Field(&cfg.EventsRate, oz.By(func(v interface{}) error {
+			if !cfg.UseAggregation {
+				return nil
+			}
 			n, _ := oz.ToUint(v)
 			if n < 1 || n > 100 {
 				return oz.NewError("range", "should be in range from 1 to 100")
@@ -351,7 +357,7 @@ func newPerCpuPerfEventTimer(nCPU int, program *ebpf.Program, rate uint64) (canc
 		fd  int
 	)
 
-	cancel = func() error {
+	cancel = func() error { //nolint:unparam
 		for i := range fds {
 			_ = unix.Close(fds[i])
 		}

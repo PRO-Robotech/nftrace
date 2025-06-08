@@ -7,8 +7,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Morwran/nft-go/pkg/nftenc"
+	"github.com/PRO-Robotech/nftrace/internal/app"
 	"github.com/PRO-Robotech/nftrace/pkg/watchers"
+
+	"github.com/H-BF/corlib/logger"
+	"github.com/Morwran/nft-go/pkg/nftenc"
 	nftLib "github.com/google/nftables"
 	"github.com/jellydator/ttlcache/v3"
 )
@@ -28,6 +31,8 @@ type (
 	}
 )
 
+var _ RuleProvider = (*ruleProvider)(nil)
+
 type ruleProvider struct {
 	cache  *ttlcache.Cache[RuleKey, RuleVal]
 	cancel context.CancelFunc
@@ -35,7 +40,7 @@ type ruleProvider struct {
 	lastErr atomic.Value
 }
 
-func NewRuleProvider(ctx context.Context) (*ruleProvider, error) {
+func NewRuleProvider(ctx context.Context, useLogging bool) (*ruleProvider, error) {
 	const ttl = 3 * time.Second
 
 	cache := ttlcache.New(
@@ -54,6 +59,10 @@ func NewRuleProvider(ctx context.Context) (*ruleProvider, error) {
 	})
 
 	ctx, cancel := context.WithCancel(ctx)
+
+	if !useLogging {
+		logger.ToContext(ctx, app.NopLogger())
+	}
 
 	rp := &ruleProvider{
 		cache:  cache,
@@ -147,6 +156,9 @@ func (rp *ruleProvider) run(ctx context.Context) {
 		return
 	}
 	defer func() { _ = ruleWatcher.Close() }()
+	log := logger.FromContext(ctx).Named("rule-provider")
+	log.Info("started, listening for rule changes")
+	defer log.Info("stopped")
 
 	for stm := ruleWatcher.Stream(ctx); ; {
 		select {
@@ -161,7 +173,7 @@ func (rp *ruleProvider) run(ctx context.Context) {
 				rp.fatal(fmt.Errorf("receive netlink error message: %w", msg.Err))
 				return
 			}
-
+			log.Debugf("received rule event: %s", msg.Evt.ActionInfo())
 			human, err := nftenc.NewRuleEncoder(msg.Evt.Val).Format()
 			if err != nil {
 				rp.fatal(fmt.Errorf("failed to format rule: %w", err))

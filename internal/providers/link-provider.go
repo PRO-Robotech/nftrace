@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"sync/atomic"
 
+	"github.com/PRO-Robotech/nftrace/internal/app"
+
+	"github.com/H-BF/corlib/logger"
 	nl "github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
 )
@@ -26,11 +29,15 @@ type (
 
 var _ LinkProvider = (*linkProvider)(nil)
 
-func NewLinkProvider(ctx context.Context) (*linkProvider, error) {
+func NewLinkProvider(ctx context.Context, useLogging bool) (*linkProvider, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	lp := &linkProvider{
 		cancel: cancel,
+	}
+
+	if !useLogging {
+		logger.ToContext(ctx, app.NopLogger())
 	}
 
 	if err := lp.reloadCache(); err != nil {
@@ -73,7 +80,13 @@ func (lp *linkProvider) run(ctx context.Context) {
 		lp.fatal(err)
 		return
 	}
-	defer close(done)
+	log := logger.FromContext(ctx).Named("link-provider")
+	log.Info("started, listening for link changes")
+
+	defer func() {
+		close(done)
+		log.Info("stopped")
+	}()
 
 	for {
 		select {
@@ -85,12 +98,16 @@ func (lp *linkProvider) run(ctx context.Context) {
 				return
 			}
 			attrs := u.Attrs()
+			action := "unknown"
 			switch u.Header.Type {
 			case unix.RTM_NEWLINK:
+				action = "added"
 				lp.cache.Put(attrs.Index, Link{Name: attrs.Name, Index: attrs.Index})
 			case unix.RTM_DELLINK:
+				action = "removed"
 				lp.cache.Del(attrs.Index)
 			}
+			log.Debugf("received link event: %s has %s", attrs.Name, action)
 		}
 	}
 }

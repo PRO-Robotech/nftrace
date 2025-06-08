@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"sync"
 
-	nl "github.com/H-BF/corlib/pkg/netlink"
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
+
+	nl "github.com/H-BF/corlib/pkg/netlink"
 	oz "github.com/go-ozzo/ozzo-validation/v4"
 	"golang.org/x/sys/unix"
 )

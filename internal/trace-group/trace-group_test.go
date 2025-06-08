@@ -120,7 +120,7 @@ func Test_TraceGroup(t *testing.T) {
 			md, err := tg.ToModel()
 			require.NoError(t, err)
 			require.Equal(t, tc.verdict, md.Verdict)
-			require.Equal(t, tc.expHandle, md.RuleHandle)
+			require.Equal(t, tc.expHandle, md.Handle)
 			tg.Close()
 		})
 	}

@@ -6,7 +6,6 @@ require (
 	github.com/H-BF/corlib v1.2.24-dev
 	github.com/Morwran/nft-go v0.0.4
 	github.com/cespare/xxhash v1.1.0
-	github.com/emirpasic/gods v1.18.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/nftables v0.3.0
 	github.com/jellydator/ttlcache/v3 v3.3.0
@@ -21,6 +20,7 @@ replace github.com/vishvananda/netlink v1.3.0 => github.com/H-BF/netlink v1.3.0-
 
 require (
 	github.com/ahmetb/go-linq/v3 v3.2.0 // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
