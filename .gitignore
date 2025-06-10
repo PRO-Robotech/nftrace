@@ -2,7 +2,6 @@
 bin
 vendor
 go.work*
-*.o
 *.skel.json
 package.json
 tmp
