@@ -17,8 +17,18 @@ import (
 	"github.com/H-BF/corlib/logger"
 )
 
+var (
+	NewEbpfTraceCollector    = newTraceCollector[EbpfCfg]
+	NewNetlinkTraceCollector = newTraceCollector[NetlinkCfg]
+)
+
 type (
-	collectorImpl struct {
+	EbpfCollector    = *collectorImpl[EbpfCfg]
+	NetlinkCollector = *collectorImpl[NetlinkCfg]
+)
+
+type (
+	collectorImpl[T cfgType] struct {
 		collector    collectors.TraceCollector
 		linkProvider providers.LinkProvider
 		ruleProvider providers.RuleProvider
@@ -33,12 +43,7 @@ type (
 	}
 )
 
-var (
-	NewEbpfTraceCollector    = newTraceCollector[EbpfCfg]
-	NewNetlinkTraceCollector = newTraceCollector[NetlinkCfg]
-)
-
-func newTraceCollector[C cfgType](cfg C, useLogging bool) (*collectorImpl, error) {
+func newTraceCollector[T cfgType](cfg T, useLogging bool) (*collectorImpl[T], error) {
 	var (
 		collector collectors.TraceCollector
 		lp        providers.LinkProvider
@@ -58,7 +63,7 @@ func newTraceCollector[C cfgType](cfg C, useLogging bool) (*collectorImpl, error
 		return nil, err
 	}
 
-	return &collectorImpl{
+	return &collectorImpl[T]{
 		collector:    collector,
 		linkProvider: lp,
 		ruleProvider: rp,
@@ -68,7 +73,7 @@ func newTraceCollector[C cfgType](cfg C, useLogging bool) (*collectorImpl, error
 }
 
 // Collect
-func (c *collectorImpl) Collect(ctx context.Context) <-chan Msg {
+func (c *collectorImpl[T]) Collect(ctx context.Context) <-chan Msg {
 	c.onceRun.Do(func() {
 		c.ch = make(chan Msg, readerQueSize)
 		go func() {
@@ -94,7 +99,7 @@ func (c *collectorImpl) Collect(ctx context.Context) <-chan Msg {
 	return c.ch
 }
 
-func (c *collectorImpl) run(ctx context.Context, cb func(nftrace.Trace, collectors.Telemetry)) error {
+func (c *collectorImpl[T]) run(ctx context.Context, cb func(nftrace.Trace, collectors.Telemetry)) error {
 	c.stopped = make(chan struct{})
 	defer close(c.stopped)
 
@@ -146,7 +151,7 @@ func (c *collectorImpl) run(ctx context.Context, cb func(nftrace.Trace, collecto
 }
 
 // Close
-func (c *collectorImpl) Close() error {
+func (c *collectorImpl[T]) Close() error {
 	c.onceClose.Do(func() {
 		close(c.stop)
 		c.onceRun.Do(func() {})
