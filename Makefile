@@ -137,6 +137,26 @@ else
 	echo -=OK=-
 endif
 
+.PHONY: rule-watcher
+rule-watcher: ##build rule-watcher. Usage: make rule-watcher [arch=<amd64|arm64>]
+rule-watcher: APP=rule-watcher
+rule-watcher: OUT=$(CURDIR)/bin/$(APP)
+rule-watcher:
+ifeq ($(filter amd64 arm64,$(arch)),)
+	$(error arch=$(arch) but must be in [amd64|arm64])
+endif
+ifneq ('$(os)','linux')
+	@$(MAKE) $@ os=linux
+else
+	@$(MAKE) go-deps && \
+	echo build '$(APP)' for OS/ARCH='$(os)'/'$(arch)' ... && \
+	echo into '$(OUT)' && \
+	env GOOS=$(os) GOARCH=$(arch) CGO_ENABLED=0 \
+	$(GO) build -ldflags="$(LDFLAGS)" -o $(OUT) $(CURDIR)/cmd/$(APP) &&\
+	echo -=OK=-
+endif
+
+
 .PHONY: .clean-ebpf
 .clean-ebpf:
 	rm -rf $(BPFDIR)/ebpf-src/*.o

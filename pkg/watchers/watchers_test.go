@@ -174,12 +174,12 @@ func (sui *watchersTestSuite) Test_RuleWatcher() {
 	for data := range stream {
 		sui.Require().NoError(data.Err)
 		sui.Require().Equal(expInfo, data.Evt.ActionInfo())
-		sui.Require().EqualValues(rule.Handle, data.Evt.Val.Handle)
-		sui.Require().EqualValues(rule.Exprs, data.Evt.Val.Exprs)
-		sui.Require().EqualValues(rule.Table, data.Evt.Val.Table)
-		sui.Require().EqualValues(rule.Chain.Name, data.Evt.Val.Chain.Name)
-		sui.Require().EqualValues(rule.Chain.Table, data.Evt.Val.Chain.Table)
-		sui.Require().EqualValues(rule.UserData, data.Evt.Val.UserData)
+		sui.Require().EqualValues(rule.Handle, data.Evt.Val.Rule.Handle)
+		sui.Require().EqualValues(rule.Exprs, data.Evt.Val.Rule.Exprs)
+		sui.Require().EqualValues(rule.Table, data.Evt.Val.Rule.Table)
+		sui.Require().EqualValues(rule.Chain.Name, data.Evt.Val.Rule.Chain.Name)
+		sui.Require().EqualValues(rule.Chain.Table, data.Evt.Val.Rule.Chain.Table)
+		sui.Require().EqualValues(rule.UserData, data.Evt.Val.Rule.UserData)
 	}
 
 	ruleWatcher.Close()

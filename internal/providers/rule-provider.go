@@ -174,22 +174,17 @@ func (rp *ruleProvider) run(ctx context.Context) {
 				return
 			}
 			log.Debugf("received rule event: %s", msg.Evt.ActionInfo())
-			human, err := nftenc.NewRuleEncoder(msg.Evt.Val).Format()
-			if err != nil {
-				rp.fatal(fmt.Errorf("failed to format rule: %w", err))
-				return
-			}
 
 			rp.cache.Set(
 				RuleKey{
-					TableName:   msg.Evt.Val.Table.Name,
-					TableFamily: msg.Evt.Val.Table.Family,
-					ChainName:   msg.Evt.Val.Chain.Name,
-					Handle:      msg.Evt.Val.Handle,
+					TableName:   msg.Evt.Val.Rule.Table.Name,
+					TableFamily: msg.Evt.Val.Rule.Table.Family,
+					ChainName:   msg.Evt.Val.Rule.Chain.Name,
+					Handle:      msg.Evt.Val.Rule.Handle,
 				},
 				RuleVal{
-					Rule:      msg.Evt.Val,
-					Human:     human,
+					Rule:      msg.Evt.Val.Rule,
+					Human:     msg.Evt.Val.Human,
 					At:        time.Now(),
 					isRemoved: msg.Evt.Action == watchers.RmAction,
 				},
