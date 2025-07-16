@@ -6,6 +6,7 @@ import (
 	"unsafe"
 
 	nl "github.com/H-BF/corlib/pkg/netlink"
+	"github.com/Morwran/nft-go/pkg/nftenc"
 	"github.com/Morwran/nft-go/pkg/nlparser"
 	"github.com/mdlayher/netlink"
 	"golang.org/x/sys/unix"
@@ -52,13 +53,19 @@ func ruleEvtFromNlMsg(msg netlink.Message) (RuleEvent, error) {
 		if err != nil {
 			return RuleEvent{}, fmt.Errorf("failed to parse rule from netlink message: %w", err)
 		}
+		var human string
 
 		act := AddAction
 		if t == unix.NFT_MSG_DELRULE {
 			act = RmAction
+		} else {
+			human, err = nftenc.NewRuleEncoder(rule).Format()
+			if err != nil {
+				return RuleEvent{}, fmt.Errorf("failed to format rule: %w", err)
+			}
 		}
 
-		return RuleEvent{Val: rule, Action: act}, nil
+		return RuleEvent{Val: NftRule{Rule: rule, Human: human}, Action: act}, nil
 	}
 
 	return RuleEvent{}, ErrMismatchedNlMsgType

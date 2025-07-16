@@ -133,6 +133,7 @@ func (c *collectorImpl[T]) run(ctx context.Context, cb func(nftrace.Trace, colle
 			return nil
 		case msg, ok := <-stm:
 			if !ok {
+				log.Warn("collector stream unexpected closed")
 				return nil
 			}
 
@@ -142,12 +143,12 @@ func (c *collectorImpl[T]) run(ctx context.Context, cb func(nftrace.Trace, colle
 
 			err = traceGroup.Handle(msg.Trace, cb)
 			if errors.Is(err, tg.ErrTraceDataNotReady) {
-				err = nil // Ignore this error, it means the trace data is not ready yet
+				err = nil
 			}
 		}
 	}
 
-	return nil
+	return err
 }
 
 // Close

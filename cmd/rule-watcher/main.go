@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"sync"
 
 	"github.com/PRO-Robotech/nftrace/internal/app"
-	. "github.com/PRO-Robotech/nftrace/internal/app/trace-monitor"
+	. "github.com/PRO-Robotech/nftrace/internal/app/nft-watcher" //nolint:revive
+	"github.com/PRO-Robotech/nftrace/pkg/watchers"
 
 	"github.com/H-BF/corlib/logger"
 	"github.com/pkg/errors"
@@ -22,42 +21,33 @@ func main() {
 	if err := app.SetupLogger(LogLevel); err != nil {
 		logger.Fatal(ctx, errors.WithMessage(err, "setup logger"))
 	}
-	collector, err := SetupCollector()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to setup collector: %v\n", err)
-		os.Exit(1)
-	}
 
+	ruleWatcher, err := watchers.RuleWatcher()
+	if err != nil {
+		logger.Fatal(ctx, errors.WithMessage(err, "create rule watcher"))
+	}
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer func() {
-			_ = collector.Close()
+			_ = ruleWatcher.Close()
 			wg.Done()
 		}()
-
-		for stm := collector.Collect(ctx); ; {
+		stm := ruleWatcher.Stream(ctx)
+		for {
 			select {
 			case <-ctx.Done():
 				return
 			case msg, ok := <-stm:
 				if !ok {
-					logger.Warn(ctx, "collector stream unexpectedly closed")
 					return
 				}
-				if msg.Err != nil {
-					logger.Fatalf(ctx, "collector error %s", msg.Err)
-				}
-				if JsonFormat {
-					logger.InfoKV(ctx, "", "trace", msg.Trace)
-				} else {
-					logger.Infof(ctx, "%s", msg.Trace.FiveTupleFormat())
-				}
+
+				logger.Infof(ctx, "%s", msg.Evt.ActionInfo())
 			}
 		}
 	}()
 	wg.Wait()
-
 	logger.SetLevel(zap.InfoLevel)
 	logger.Info(ctx, "-= BYE =-")
 }

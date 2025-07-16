@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Morwran/nft-go/pkg/nftenc"
 	"github.com/Morwran/nft-go/pkg/nlparser"
 	nftLib "github.com/google/nftables"
 )
@@ -59,7 +58,12 @@ type (
 
 	LinkEvent event[Link]
 
-	RuleEvent       nftEvent[*nftLib.Rule]
+	NftRule struct {
+		Rule  *nftLib.Rule
+		Human string
+	}
+
+	RuleEvent       nftEvent[NftRule]
 	ChainEvent      nftEvent[*nftLib.Chain]
 	SetEvent        nftEvent[*nftLib.Set]
 	SetElementEvent nftEvent[*nlparser.SetElems]
@@ -75,9 +79,14 @@ func (l LinkEvent) ActionInfo() string {
 }
 
 func (r RuleEvent) ActionInfo() string {
-	if r.Val != nil && r.Action != "" {
-		return fmt.Sprintf("%T: rule '%s' has %s", r, nftenc.NewRuleEncoder(r.Val), r.Action)
+	if r.Val.Rule != nil && r.Action != "" {
+		if r.Val.Human != "" {
+			return fmt.Sprintf("%T: rule '%s' has %s", r, r.Val.Human, r.Action)
+		}
+
+		return fmt.Sprintf("%T: rule handle %d has %s", r, r.Val.Rule.Handle, r.Action)
 	}
+
 	return ""
 }
 
