@@ -1,6 +1,15 @@
 // go:build ignore
 
 #include "vmlinux.h"
+#ifdef __TARGET_ARCH_arm64
+struct user_pt_regs
+{
+    unsigned long regs[31];
+    unsigned long sp;
+    unsigned long pc;
+    unsigned long pstate;
+};
+#endif
 #include <bpf/bpf_tracing.h>
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_core_read.h>
