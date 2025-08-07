@@ -301,6 +301,7 @@ struct trace_info
     u32 dst_ip;
     struct in6_addr src_ip6;
     struct in6_addr dst_ip6;
+    u32 netns_inum;
     u16 len;
     u8 src_mac[6];
     u8 dst_mac[6];

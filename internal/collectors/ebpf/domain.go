@@ -36,6 +36,7 @@ type (
 func (trace *EbpfTrace) ToNftTrace() collectors.NftTrace {
 	return collectors.NftTrace{
 		TraceHash:  trace.TraceHash,
+		NetnsInum:  trace.NetnsInum,
 		Table:      decoders.FastBytes2String(bytes.TrimRight(trace.TableName[:], "\x00")),
 		Chain:      decoders.FastBytes2String(bytes.TrimRight(trace.ChainName[:], "\x00")),
 		JumpTarget: decoders.FastBytes2String(bytes.TrimRight(trace.JumpTarget[:], "\x00")),

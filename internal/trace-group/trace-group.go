@@ -33,23 +33,25 @@ func NewTraceGroup(link providers.LinkProvider, rule providers.RuleProvider) *Tr
 }
 
 func (t *TraceGroup) Handle(tr collectors.NftTrace, cb func(model.Trace, collectors.Telemetry)) error {
-	if err := t.AddTrace(tr); err != nil {
+	err := t.AddTrace(tr)
+	if err != nil {
 		return err
 	}
 	if !t.GroupReady() {
 		return ErrTraceDataNotReady
 	}
-	m, err := t.ToModel()
-	if err != nil {
+	var m model.Trace
+	if m, err = t.ToModel(); err == nil {
+		if cb != nil {
+			cb(m, tr.Metrics)
+		}
+	}
+	if err != nil && !errors.Is(err, ErrTraceEndOfChain) {
 		return fmt.Errorf("failed to convert obtained trace into model: %w", err)
 	}
 	t.Reset()
 
-	if cb != nil {
-		cb(m, tr.Metrics)
-	}
-
-	return nil
+	return err
 }
 
 func (t *TraceGroup) AddTrace(tr collectors.NftTrace) error {
@@ -107,7 +109,7 @@ func (t *TraceGroup) ToModel() (m model.Trace, err error) {
 	}
 
 	if t.topTrace.Type != unix.NFT_TRACETYPE_RULE {
-		return m, errors.New("can't find trace of rule type")
+		return m, ErrTraceEndOfChain
 	}
 
 	humanRule, err := t.rule.GetHumanRule(providers.RuleKey{
@@ -178,4 +180,5 @@ var (
 	ErrUnknownTraceType  = errors.New("unknown trace type")
 	ErrTraceGroupEmpty   = errors.New("trace group is empty")
 	ErrTraceDataNotReady = errors.New("trace data is not ready")
+	ErrTraceEndOfChain   = errors.New("trace data is end of chain")
 )

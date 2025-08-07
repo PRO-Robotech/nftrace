@@ -124,6 +124,16 @@ func NewEbpfTraceCollector(cfg Config) (tc *ebpfTraceCollector, err error) {
 		cancels = append(cancels, cancelPerfEvent)
 	}
 
+	var st unix.Stat_t
+	if err = unix.Stat("/proc/self/ns/net", &st); err != nil {
+		return nil, fmt.Errorf("failed to get inode of netns: %w", err)
+	}
+	inum := uint32(st.Ino)
+
+	if err = objs.TargetNetns.Put(key, inum); err != nil {
+		return nil, fmt.Errorf("failed to update target_netns map: %w", err)
+	}
+
 	kp, e := link.Kprobe(kProbeBreakPoint, objs.KprobeNftTraceNotify, nil)
 	if e != nil {
 		return nil, fmt.Errorf("opening kprobe: %w", e)
