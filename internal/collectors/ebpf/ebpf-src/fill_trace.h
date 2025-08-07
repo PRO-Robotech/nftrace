@@ -272,6 +272,36 @@ static __always_inline u8 get_nfproto(const void *pkt)
     return BPF_CORE_READ((const NFT_PKTINFO_TYPE *)pkt, xt.state, pf);
 }
 
+static __always_inline struct net *__nft_net(const void *pkt)
+{
+    if (!IS_NFT_CORE_ENABLED)
+    {
+        return BPF_PROBE_READ((const NFT_PKTINFO_NOCORE_TYPE *)pkt, xt.state, net);
+    }
+    if (bpf_core_field_exists(((struct nft_pktinfo *)0)->state))
+    {
+        return BPF_CORE_READ((const NFT_PKTINFO_TYPE *)pkt, state, net);
+    }
+    return BPF_CORE_READ((const NFT_PKTINFO_TYPE *)pkt, xt.state, net);
+}
+
+static __always_inline struct net *get_nft_net(struct pt_regs *ctx)
+{
+    if (!bpf_core_type_exists(struct nft_traceinfo))
+    {
+        NFT_TRACEINFO_NOCORE_TYPE *info = (void *)PT_REGS_PARM1(ctx);
+        return __nft_net(BPF_PROBE_READ(info, pkt));
+    }
+
+    if (bpf_core_field_exists(((struct nft_traceinfo *)0)->pkt))
+    {
+        NFT_TRACEINFO_TYPE *info = (void *)PT_REGS_PARM1(ctx);
+        return __nft_net(BPF_CORE_READ(info, pkt));
+    }
+
+    return __nft_net((void *)PT_REGS_PARM1(ctx));
+}
+
 #define __fill_verdict_info(trace, verdict)                                                                                \
     ({                                                                                                                     \
         trace->verdict = BPF_READ_NFT(verdict, code);                                                                      \
@@ -329,7 +359,35 @@ static __always_inline u8 get_nfproto(const void *pkt)
         __fill_dev_info(trace, pkt);                                                                                               \
         fill_trace_pkt_info(trace, skb);                                                                                           \
         trace->trace_hash = get_trace_hash(trace, skb);                                                                            \
+        trace->netns_inum = BPF_READ_NFT(__nft_net(pkt), ns.inum);                                                                 \
         __sync_fetch_and_add(&trace->counter, 1);                                                                                  \
     })
+
+static __always_inline void fill_trace(struct trace_info *trace, struct pt_regs *ctx)
+{
+    if (!IS_NFT_CORE_ENABLED)
+    {
+        NFT_TRACEINFO_NOCORE_TYPE *info = (void *)PT_REGS_PARM1(ctx);
+        typeof(info->pkt) pkt = BPF_PROBE_READ(info, pkt);
+        typeof(info->verdict) verdict = BPF_PROBE_READ(info, verdict);
+        typeof(info->rule) rule = BPF_PROBE_READ(info, rule);
+        __fill_trace(trace, pkt, verdict, rule, info);
+        return;
+    }
+    if (bpf_core_field_exists(((struct nft_traceinfo *)0)->pkt))
+    {
+        NFT_TRACEINFO_TYPE *info = (void *)PT_REGS_PARM1(ctx);
+        typeof(info->pkt) pkt = BPF_CORE_READ(info, pkt);
+        typeof(info->verdict) verdict = BPF_CORE_READ(info, verdict);
+        typeof(info->rule) rule = BPF_CORE_READ(info, rule);
+        __fill_trace(trace, pkt, verdict, rule, info);
+        return;
+    }
+    NFT_PKTINFO_TYPE *pkt = (void *)PT_REGS_PARM1(ctx);
+    NFT_VERDICT_TYPE *verdict = (void *)PT_REGS_PARM2(ctx);
+    NFT_RULE_DP_TYPE *rule = (void *)PT_REGS_PARM3(ctx);
+    NFT_TRACEINFO_TYPE *info = (void *)PT_REGS_PARM4(ctx);
+    __fill_trace(trace, pkt, verdict, rule, info);
+}
 
 #endif

@@ -41,12 +41,12 @@ type bpfTraceInfo struct {
 	DstIp       uint32
 	SrcIp6      struct{ In6U struct{ U6Addr8 [16]uint8 } }
 	DstIp6      struct{ In6U struct{ U6Addr8 [16]uint8 } }
+	NetnsInum   uint32
 	Len         uint16
 	SrcMac      [6]uint8
 	DstMac      [6]uint8
 	IpProto     uint8
 	IpVersion   uint8
-	_           [4]byte
 }
 
 // loadBpf returns the embedded CollectionSpec for bpf.
@@ -103,6 +103,7 @@ type bpfMapSpecs struct {
 	RdTraceCounter  *ebpf.MapSpec `ebpf:"rd_trace_counter"`
 	RdWaitCounter   *ebpf.MapSpec `ebpf:"rd_wait_counter"`
 	SampleRate      *ebpf.MapSpec `ebpf:"sample_rate"`
+	TargetNetns     *ebpf.MapSpec `ebpf:"target_netns"`
 	TraceEvents     *ebpf.MapSpec `ebpf:"trace_events"`
 	TracesPerCpu    *ebpf.MapSpec `ebpf:"traces_per_cpu"`
 	UseAggregation  *ebpf.MapSpec `ebpf:"use_aggregation"`
@@ -134,6 +135,7 @@ type bpfMaps struct {
 	RdTraceCounter  *ebpf.Map `ebpf:"rd_trace_counter"`
 	RdWaitCounter   *ebpf.Map `ebpf:"rd_wait_counter"`
 	SampleRate      *ebpf.Map `ebpf:"sample_rate"`
+	TargetNetns     *ebpf.Map `ebpf:"target_netns"`
 	TraceEvents     *ebpf.Map `ebpf:"trace_events"`
 	TracesPerCpu    *ebpf.Map `ebpf:"traces_per_cpu"`
 	UseAggregation  *ebpf.Map `ebpf:"use_aggregation"`
@@ -148,6 +150,7 @@ func (m *bpfMaps) Close() error {
 		m.RdTraceCounter,
 		m.RdWaitCounter,
 		m.SampleRate,
+		m.TargetNetns,
 		m.TraceEvents,
 		m.TracesPerCpu,
 		m.UseAggregation,

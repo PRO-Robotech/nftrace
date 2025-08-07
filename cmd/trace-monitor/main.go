@@ -51,7 +51,7 @@ func main() {
 				if JsonFormat {
 					logger.InfoKV(ctx, "", "trace", msg.Trace)
 				} else {
-					logger.Infof(ctx, "%s", msg.Trace.FiveTupleFormat())
+					logger.Infof(ctx, "%s cnt=%-10d", msg.Trace.FiveTupleFormat(), msg.Trace.Cnt)
 				}
 			}
 		}

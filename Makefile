@@ -91,9 +91,8 @@ else
 endif
 
 BPFDIR:=$(CURDIR)/internal/collectors/ebpf
-
-.PHONY: .ebpf
-.ebpf: | .install-bpf2go ##build ebpf program. Usage: make .ebpf [arch=<amd64|arm64>]
+.PHONY: ebpf-artifacts
+ebpf-artifacts: | .install-bpf2go ##build ebpf artifacts. Usage: make ebpf-artifacts [arch=<amd64|arm64>]
 ifeq ($(filter amd64 arm64,$(arch)),)
 	$(error arch=$(arch) but must be in [amd64|arm64])
 endif
@@ -104,6 +103,14 @@ else
 	$(BPF2GO) -output-dir $(BPFDIR) -tags $(os) -type trace_info -go-package=ebpf -target $(arch) bpf $(BPFDIR)/ebpf-src/nftrace.c -- -I$(BPFDIR)/ebpf-src/ && \
 	echo -=OK=-
 endif
+
+.PHONY: ebpf
+ebpf: ##build multiarch ebpf artifacts. Usage: make ebpf
+	echo build ebpf artifacts ... && \
+	$(MAKE) ebpf-artifacts os=linux arch=amd64 && \
+	$(MAKE) ebpf-artifacts os=linux arch=arm64 && \
+	echo -=OK=-
+
 
 .PHONY: .install-mockery
 .install-mockery:
@@ -129,7 +136,6 @@ ifneq ('$(os)','linux')
 	@$(MAKE) $@ os=linux
 else
 	@$(MAKE) go-deps && \
-	$(MAKE) .ebpf arch=$(arch) && \
 	echo build '$(APP)' for OS/ARCH='$(os)'/'$(arch)' ... && \
 	echo into '$(OUT)' && \
 	env GOOS=$(os) GOARCH=$(arch) CGO_ENABLED=0 \
