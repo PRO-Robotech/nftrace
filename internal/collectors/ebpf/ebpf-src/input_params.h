@@ -17,6 +17,14 @@ struct
     __type(value, u64);
 } use_aggregation SEC(".maps");
 
+struct
+{
+    __uint(type, BPF_MAP_TYPE_ARRAY);
+    __uint(max_entries, 1);
+    __type(key, u32);
+    __type(value, u32); // netns inum
+} target_netns SEC(".maps");
+
 static __always_inline bool is_aggregation_enabled()
 {
     u32 key = 0;
@@ -38,6 +46,17 @@ static __always_inline u64 get_sample_rate()
 static __always_inline bool is_sampling_enabled()
 {
     return get_sample_rate() > 0;
+}
+
+static __always_inline u32 get_target_netns()
+{
+    u32 key = 0;
+    u32 *val = bpf_map_lookup_elem(&target_netns, &key);
+    if (!val)
+    {
+        return 0;
+    }
+    return *val;
 }
 
 #endif

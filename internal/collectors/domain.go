@@ -3,6 +3,7 @@ package collectors
 type (
 	NftTrace struct {
 		TraceHash  uint32
+		NetnsInum  uint32
 		Table      string
 		Chain      string
 		JumpTarget string

@@ -142,7 +142,8 @@ func (c *collectorImpl[T]) run(ctx context.Context, cb func(nftrace.Trace, colle
 			}
 
 			err = traceGroup.Handle(msg.Trace, cb)
-			if errors.Is(err, tg.ErrTraceDataNotReady) {
+			if errors.Is(err, tg.ErrTraceDataNotReady) ||
+				errors.Is(err, tg.ErrTraceEndOfChain) {
 				err = nil
 			}
 		}

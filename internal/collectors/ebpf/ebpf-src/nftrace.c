@@ -86,6 +86,18 @@ int send_agregated_trace(struct bpf_perf_event_data *ctx)
     return 0;
 }
 
+static __always_inline bool is_target_ns(struct pt_regs *ctx)
+{
+    u32 target_netns = get_target_netns();
+    if (target_netns == 0)
+    {
+        bpf_printk("return target_netns == 0");
+        return true;
+    }
+    u32 inum = BPF_READ_NFT(get_nft_net(ctx), ns.inum);
+    return inum == target_netns;
+}
+
 SEC("kprobe/nft_trace_notify")
 int kprobe_nft_trace_notify(struct pt_regs *ctx)
 {
@@ -93,7 +105,12 @@ int kprobe_nft_trace_notify(struct pt_regs *ctx)
 
     struct trace_info trace = {};
 
-    FILL_TRACE(&trace, ctx);
+    fill_trace(&trace, ctx);
+    u32 tg = get_target_netns();
+    if (trace.netns_inum != tg)
+    {
+        return 0;
+    }
 
     u64 sample_rate_val = get_sample_rate();
 
