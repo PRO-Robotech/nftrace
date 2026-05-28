@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Morwran/nft-go/pkg/nlparser"
+	"github.com/PRO-Robotech/nft-go/pkg/nlparser"
 	nftLib "github.com/google/nftables"
 )
 

@@ -161,7 +161,7 @@ func (sui *watchersTestSuite) Test_RuleWatcher() {
 		que:       queue.NewFIFO[RuleEvent](),
 		stop:      make(chan struct{}),
 	}
-	expRuleExpr := `meta l4proto tcp counter packets 0 bytes 0 log accept comment "` + comment + `" # handle 5`
+	expRuleExpr := `counter packets 0 bytes 0 log accept comment "` + comment + `" # handle 5`
 	expInfo := fmt.Sprintf(
 		`%T: rule '%s' has added`, *new(RuleEvent), expRuleExpr,
 	)
@@ -313,7 +313,7 @@ func (sui *watchersTestSuite) Test_NftWatcher() {
 		que:       queue.NewFIFO[NftEvent](),
 		stop:      make(chan struct{}),
 	}
-	expRuleExpr := `meta l4proto tcp counter packets 0 bytes 0 log accept comment "` + comment + `" # handle 5`
+	expRuleExpr := `counter packets 0 bytes 0 log accept comment "` + comment + `" # handle 5`
 	expRuleInfo := fmt.Sprintf(
 		`%T: rule '%s' has added`, *new(RuleEvent), expRuleExpr,
 	)

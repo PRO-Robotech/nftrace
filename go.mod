@@ -4,7 +4,7 @@ go 1.25
 
 require (
 	github.com/H-BF/corlib v1.2.24-dev
-	github.com/Morwran/nft-go v0.0.4
+	github.com/PRO-Robotech/nft-go v0.0.4-dev.3
 	github.com/cespare/xxhash v1.1.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/google/nftables v0.3.0
@@ -26,6 +26,7 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mdlayher/socket v0.5.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/samber/lo v1.53.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
@@ -40,12 +41,11 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
 
 replace github.com/H-BF/corlib v1.2.24-dev => github.com/PRO-Robotech/corelib v1.2.24-dev
-
-replace github.com/Morwran/nft-go v0.0.4 => github.com/PRO-Robotech/nft-go v0.0.4-dev
 
 require (
 	github.com/cilium/ebpf v0.18.0
