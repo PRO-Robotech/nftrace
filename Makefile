@@ -162,6 +162,25 @@ else
 	echo -=OK=-
 endif
 
+.PHONY: nft-watcher
+nft-watcher: ##build nft-watcher. Usage: make nft-watcher [arch=<amd64|arm64>]
+nft-watcher: APP=nft-watcher
+nft-watcher: OUT=$(CURDIR)/bin/$(APP)
+nft-watcher:
+ifeq ($(filter amd64 arm64,$(arch)),)
+	$(error arch=$(arch) but must be in [amd64|arm64])
+endif
+ifneq ('$(os)','linux')
+	@$(MAKE) $@ os=linux
+else
+	@$(MAKE) go-deps && \
+	echo build '$(APP)' for OS/ARCH='$(os)'/'$(arch)' ... && \
+	echo into '$(OUT)' && \
+	env GOOS=$(os) GOARCH=$(arch) CGO_ENABLED=0 \
+	$(GO) build -ldflags="$(LDFLAGS)" -o $(OUT) $(CURDIR)/cmd/$(APP) &&\
+	echo -=OK=-
+endif
+
 
 .PHONY: .clean-ebpf
 .clean-ebpf:
