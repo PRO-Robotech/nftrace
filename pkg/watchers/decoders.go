@@ -6,8 +6,8 @@ import (
 	"unsafe"
 
 	nl "github.com/H-BF/corlib/pkg/netlink"
-	"github.com/Morwran/nft-go/pkg/nftenc"
-	"github.com/Morwran/nft-go/pkg/nlparser"
+	"github.com/PRO-Robotech/nft-go/pkg/nftenc"
+	"github.com/PRO-Robotech/nft-go/pkg/nlparser"
 	"github.com/mdlayher/netlink"
 	"golang.org/x/sys/unix"
 )

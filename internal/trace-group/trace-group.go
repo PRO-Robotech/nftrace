@@ -9,8 +9,8 @@ import (
 	"github.com/PRO-Robotech/nftrace/internal/collectors"
 	"github.com/PRO-Robotech/nftrace/internal/providers"
 
-	"github.com/Morwran/nft-go/pkg/nftenc"
-	"github.com/Morwran/nft-go/pkg/protocols"
+	"github.com/PRO-Robotech/nft-go/pkg/nftenc"
+	"github.com/PRO-Robotech/nft-go/pkg/protocols"
 	nftLib "github.com/google/nftables"
 	"golang.org/x/sys/unix"
 )
