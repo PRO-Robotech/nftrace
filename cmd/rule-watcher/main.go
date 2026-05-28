@@ -43,7 +43,7 @@ func main() {
 					return
 				}
 
-				logger.Infof(ctx, "%s", msg.Evt.ActionInfo())
+				logger.Infof(ctx, "[%s] %s", msg.Evt.GetAction(), msg.Evt.ActionInfo())
 			}
 		}
 	}()

@@ -1,6 +1,6 @@
 module github.com/PRO-Robotech/nftrace
 
-go 1.24.2
+go 1.25
 
 require (
 	github.com/H-BF/corlib v1.2.24-dev

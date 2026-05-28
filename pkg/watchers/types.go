@@ -15,6 +15,10 @@ const (
 	RmAction  Action = "removed"
 )
 
+func (a Action) GetAction() Action {
+	return a
+}
+
 type (
 	watcherT interface {
 		LinkEvent | RuleEvent | ChainEvent |
@@ -34,21 +38,14 @@ type (
 )
 
 type NftEventFace interface {
-	isNftEvent()
 	ActionInfo() string
+	GetAction() Action
 }
 
-type (
-	event[T any] struct {
-		Val    T
-		Action Action
-	}
-	nftEvent[T any] struct {
-		Val    T
-		Action Action
-		NftEventFace
-	}
-)
+type event[T any] struct {
+	Val T
+	Action
+}
 
 type (
 	Link struct {
@@ -63,11 +60,11 @@ type (
 		Human string
 	}
 
-	RuleEvent       nftEvent[NftRule]
-	ChainEvent      nftEvent[*nftLib.Chain]
-	SetEvent        nftEvent[*nftLib.Set]
-	SetElementEvent nftEvent[*nlparser.SetElems]
-	TableEvent      nftEvent[*nftLib.Table]
+	RuleEvent       event[NftRule]
+	ChainEvent      event[*nftLib.Chain]
+	SetEvent        event[*nftLib.Set]
+	SetElementEvent event[*nlparser.SetElems]
+	TableEvent      event[*nftLib.Table]
 	NftEvent        event[NftEventFace]
 )
 
